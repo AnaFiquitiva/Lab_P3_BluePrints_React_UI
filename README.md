@@ -402,6 +402,28 @@ Esto levanta el frontend en el puerto 5173 y espera el backend en el puerto 8080
 
 ---
 
+## Evidencia
+
+### Imagen 1 — Pagina principal y busqueda de planos por autor
+
+Muestra la pagina principal de la aplicacion con el campo de busqueda por autor. Se ingresa el nombre `JohnConnor` y el sistema retorna la lista de blueprints disponibles junto con el total de puntos del autor.
+
+![Evidencia 1](images/1.jpeg)
+
+### Imagen 2 — Visualizacion de un blueprint en el canvas
+
+Se selecciona un plano de la tabla haciendo clic en "Open". El blueprint se renderiza en el lienzo HTML5 con la cuadricula de fondo, los puntos representados como circulos amarillos y las lineas de conexion en azul claro.
+
+![Evidencia 2](images/2.jpeg)
+
+### Imagen 3 — Autenticacion y creacion de un nuevo blueprint
+
+Vista de la pagina de login y, tras autenticarse, acceso a la ruta protegida `/create` donde el usuario puede hacer clic sobre el canvas para definir nuevos puntos y crear un blueprint personalizado.
+
+![Evidencia 3](images/3.jpeg)
+
+---
+
 ## Autor
 
 **Ana Fiquitiva**
