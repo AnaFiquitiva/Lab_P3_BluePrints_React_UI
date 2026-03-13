@@ -53,6 +53,24 @@ Por defecto, la aplicacion arranca en **modo mock** (`VITE_USE_MOCK=true`), lo q
 
 ---
 
+## Como probar la funcionalidad (Modo Mock)
+
+Dado que la aplicacion inicia por defecto con datos de prueba, la revision puede hacerse completamente sin el backend:
+
+1. **Buscar planos de un autor:**
+   - En el campo "Author" escribir `JohnConnor` (o `SarahConnor`).
+   - Hacer clic en **"Get blueprints"**. Aparecera una tabla con los planos disponibles.
+2. **Dibujar un plano en el Canvas:**
+   - En la tabla de resultados, hacer clic en el boton **"Open"** de cualquier plano.
+   - El plano se dibujara automaticamente en el lienzo de la derecha.
+3. **Probar Autenticacion y Rutas Protegidas:**
+   - Hacer clic en **"Login"** en el menu superior.
+   - En modo mock, puede ingresar **cualquier usuario y contrasena**.
+   - Al iniciar sesion mediante esta simulacion, se activara el acceso a la ruta privada y aparecera la opcion **"Crear"** en el menu de navegacion.
+   - Al entrar a "Crear", se puede probar la interaccion de hacer clics en el lienzo para dibujar nuevos puntos.
+
+---
+
 ## Variables de entorno
 
 El archivo `.env` en la raiz del proyecto contiene las siguientes variables:
