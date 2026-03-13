@@ -64,7 +64,7 @@ export default function CreateBlueprintPage() {
         <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
           Haz clic en el lienzo para agregar puntos ({points.length} puntos)
         </p>
-        {error && <p style={{ color: '#f87171' }}>⚠ {error}</p>}
+        {error && <p style={{ color: '#dc3545' }}>Error: {error}</p>}
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <button
             type="submit"

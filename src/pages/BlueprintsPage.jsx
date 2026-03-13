@@ -65,8 +65,8 @@ export default function BlueprintsPage() {
 
         {/* Error banner con Retry */}
         {status === 'failed' && error && (
-          <div className="card" style={{ borderColor: '#f87171' }}>
-            <p style={{ color: '#f87171', margin: 0 }}>⚠ {error}</p>
+          <div className="card" style={{ borderColor: '#dc3545' }}>
+            <p style={{ color: '#dc3545', margin: 0 }}>Error: {error}</p>
             <button className="btn" style={{ marginTop: 8 }} onClick={handleRetry}>
               Reintentar
             </button>
@@ -98,7 +98,7 @@ export default function BlueprintsPage() {
                       style={{
                         textAlign: 'left',
                         padding: '8px',
-                        borderBottom: '1px solid #334155',
+                        borderBottom: '1px solid #dee2e6',
                       }}
                     >
                       Blueprint name
@@ -125,7 +125,7 @@ export default function BlueprintsPage() {
                         style={{
                           padding: '8px',
                           textAlign: 'right',
-                          borderBottom: '1px solid #1f2937',
+                          borderBottom: '1px solid #e9ecef',
                         }}
                       >
                         {bp.points?.length || 0}

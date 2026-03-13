@@ -8,9 +8,9 @@ export default function BlueprintCanvas({ points = [], width = 520, height = 360
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.fillStyle = '#0b1220'
+    ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.strokeStyle = 'rgba(148,163,184,0.15)'
+    ctx.strokeStyle = 'rgba(0,0,0,0.07)'
     ctx.lineWidth = 1
     for (let x = 0; x < canvas.width; x += 40) {
       ctx.beginPath()
@@ -25,7 +25,7 @@ export default function BlueprintCanvas({ points = [], width = 520, height = 360
       ctx.stroke()
     }
     if (points.length > 1) {
-      ctx.strokeStyle = '#93c5fd'
+      ctx.strokeStyle = '#0d6efd'
       ctx.lineWidth = 2
       ctx.beginPath()
       ctx.moveTo(points[0].x, points[0].y)
@@ -35,7 +35,7 @@ export default function BlueprintCanvas({ points = [], width = 520, height = 360
       }
       ctx.stroke()
     }
-    ctx.fillStyle = '#fbbf24'
+    ctx.fillStyle = '#fd7e14'
     for (const p of points) {
       ctx.beginPath()
       ctx.arc(p.x, p.y, 4, 0, Math.PI * 2)
@@ -49,9 +49,9 @@ export default function BlueprintCanvas({ points = [], width = 520, height = 360
       width={width}
       height={height}
       style={{
-        background: '#0b1220',
-        border: '1px solid #334155',
-        borderRadius: 12,
+        background: '#ffffff',
+        border: '1px solid #dee2e6',
+        borderRadius: 8,
         width: '100%',
         maxWidth: width,
       }}
