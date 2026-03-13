@@ -3,6 +3,15 @@ import api from '../../services/apiClient.js'
 
 export const login = createAsyncThunk('auth/login', async ({ username, password }, thunkAPI) => {
   try {
+    // Si estamos en modo MOCK, simulamos un login exitoso
+    if (import.meta.env.VITE_USE_MOCK === 'true') {
+      await new Promise((resolve) => setTimeout(resolve, 500)) // delay simulado
+      const token = 'mock-jwt-token-123456789'
+      localStorage.setItem('token', token)
+      return { token, username }
+    }
+
+    // Si NO estamos en modo mock, usa el backend real
     const { data } = await api.post('/auth/login', { username, password })
     const token = data.access_token || data.token
     localStorage.setItem('token', token)
