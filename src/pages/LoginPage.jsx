@@ -1,34 +1,40 @@
 import { useState } from 'react'
-import api from '../services/apiClient.js'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { login } from '../features/auth/authSlice.js'
 
 export default function LoginPage() {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { status, error } = useSelector((s) => s.auth)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
 
   const submit = async (e) => {
     e.preventDefault()
-    setError(null)
-    try {
-      const { data } = await api.post('/auth/login', { username, password })
-      localStorage.setItem('token', data.token)
-      alert('Login exitoso')
-    } catch (e) {
-      setError('Credenciales inválidas o servidor no disponible')
+    const result = await dispatch(login({ username, password }))
+    if (login.fulfilled.match(result)) {
+      navigate('/')
     }
   }
 
   return (
-    <form className="card" onSubmit={submit}>
+    <form className="card" onSubmit={submit} style={{ maxWidth: 500 }}>
       <h2 style={{ marginTop: 0 }}>Login</h2>
       <div className="grid cols-2">
         <div>
-          <label>Usuario</label>
-          <input className="input" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <label htmlFor="login-user">Usuario</label>
+          <input
+            id="login-user"
+            className="input"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
         <div>
-          <label>Contraseña</label>
+          <label htmlFor="login-pass">Contraseña</label>
           <input
+            id="login-pass"
             type="password"
             className="input"
             value={password}
@@ -37,8 +43,8 @@ export default function LoginPage() {
         </div>
       </div>
       {error && <p style={{ color: '#f87171' }}>{error}</p>}
-      <button className="btn primary" style={{ marginTop: 12 }}>
-        Ingresar
+      <button className="btn primary" style={{ marginTop: 12 }} disabled={status === 'loading'}>
+        {status === 'loading' ? 'Ingresando...' : 'Ingresar'}
       </button>
     </form>
   )

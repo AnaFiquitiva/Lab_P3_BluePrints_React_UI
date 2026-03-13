@@ -4,12 +4,13 @@ import {
   fetchAuthors,
   fetchByAuthor,
   fetchBlueprint,
+  clearError,
 } from '../features/blueprints/blueprintsSlice.js'
 import BlueprintCanvas from '../components/BlueprintCanvas.jsx'
 
 export default function BlueprintsPage() {
   const dispatch = useDispatch()
-  const { byAuthor, current, status } = useSelector((s) => s.blueprints)
+  const { byAuthor, current, status, error } = useSelector((s) => s.blueprints)
   const [authorInput, setAuthorInput] = useState('')
   const [selectedAuthor, setSelectedAuthor] = useState('')
   const items = byAuthor[selectedAuthor] || []
@@ -33,6 +34,15 @@ export default function BlueprintsPage() {
     dispatch(fetchBlueprint({ author: bp.author, name: bp.name }))
   }
 
+  const handleRetry = () => {
+    dispatch(clearError())
+    if (selectedAuthor) {
+      dispatch(fetchByAuthor(selectedAuthor))
+    } else {
+      dispatch(fetchAuthors())
+    }
+  }
+
   return (
     <div className="grid" style={{ gridTemplateColumns: '1.1fr 1.4fr', gap: 24 }}>
       <section className="grid" style={{ gap: 16 }}>
@@ -40,23 +50,45 @@ export default function BlueprintsPage() {
           <h2 style={{ marginTop: 0 }}>Blueprints</h2>
           <div style={{ display: 'flex', gap: 12 }}>
             <input
+              id="author-input"
               className="input"
               placeholder="Author"
               value={authorInput}
               onChange={(e) => setAuthorInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && getBlueprints()}
             />
-            <button className="btn primary" onClick={getBlueprints}>
+            <button id="btn-get-blueprints" className="btn primary" onClick={getBlueprints}>
               Get blueprints
             </button>
           </div>
         </div>
 
+        {/* Error banner con Retry */}
+        {status === 'failed' && error && (
+          <div className="card" style={{ borderColor: '#f87171' }}>
+            <p style={{ color: '#f87171', margin: 0 }}>⚠ {error}</p>
+            <button className="btn" style={{ marginTop: 8 }} onClick={handleRetry}>
+              Reintentar
+            </button>
+          </div>
+        )}
+
         <div className="card">
           <h3 style={{ marginTop: 0 }}>
             {selectedAuthor ? `${selectedAuthor}'s blueprints:` : 'Results'}
           </h3>
-          {status === 'loading' && <p>Cargando...</p>}
-          {!items.length && status !== 'loading' && <p>Sin resultados.</p>}
+
+          {status === 'loading' && (
+            <div className="loading-spinner" aria-label="Cargando">
+              <div className="spinner" />
+              <p>Cargando...</p>
+            </div>
+          )}
+
+          {!items.length && status !== 'loading' && status !== 'failed' && (
+            <p>Sin resultados.</p>
+          )}
+
           {!!items.length && (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>

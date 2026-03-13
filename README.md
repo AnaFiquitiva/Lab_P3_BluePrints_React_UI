@@ -1,186 +1,391 @@
-# Lab – React Client for Blueprints (Redux + Axios + JWT)
+# Laboratorio - React Client for Blueprints
 
-> Basado en el cliente HTML/JS del repo de referencia, este laboratorio moderniza el _frontend_ con **React + Vite**, **Redux Toolkit**, **Axios** (con interceptores y JWT), **React Router** y pruebas con **Vitest + Testing Library**.
+**Escuela Colombiana de Ingenieria Julio Garavito**
+**Arquitectura de Software -- ARSW**
 
-## Objetivos de aprendizaje
+Aplicacion SPA desarrollada con **React 18 + Vite**, **Redux Toolkit**, **Axios** (con interceptores JWT), **React Router** y pruebas automatizadas con **Vitest + Testing Library**.
 
-- Diseñar una SPA en React aplicando **componetización** y **Redux (reducers/slices)**.
-- Consumir APIs REST de Blueprints con **Axios** y manejar **estados de carga/errores**.
-- Integrar **autenticación JWT** con interceptores y rutas protegidas.
-- Aplicar buenas prácticas: estructura de carpetas, `.env`, linters, testing, CI.
+Este frontend consume las APIs REST de Blueprints implementadas en los laboratorios anteriores (Labs 3 y 4), incluyendo autenticacion con JWT.
+
+---
+
+## Tabla de Contenidos
+
+1. [Requisitos previos](#requisitos-previos)
+2. [Instalacion y ejecucion](#instalacion-y-ejecucion)
+3. [Variables de entorno](#variables-de-entorno)
+4. [Estructura del proyecto](#estructura-del-proyecto)
+5. [Arquitectura y diseno](#arquitectura-y-diseno)
+6. [Funcionalidades implementadas](#funcionalidades-implementadas)
+7. [Capa de servicios](#capa-de-servicios)
+8. [Gestion de estado con Redux](#gestion-de-estado-con-redux)
+9. [Autenticacion JWT](#autenticacion-jwt)
+10. [Pruebas automatizadas](#pruebas-automatizadas)
+11. [Integracion continua](#integracion-continua)
+12. [Scripts disponibles](#scripts-disponibles)
+13. [Endpoints consumidos](#endpoints-consumidos)
+14. [Docker](#docker)
+15. [Repositorios relacionados](#repositorios-relacionados)
+
+---
 
 ## Requisitos previos
 
-- Tener corriendo el backend de Blueprints de los **Labs 3 y 4** (APIs + seguridad).
-- Node.js 18+ y npm.
+- Node.js 18 o superior
+- npm
+- Backend de Blueprints corriendo (Labs 3 y 4) si se desea usar la API real
 
-Ver la especificación de glosario clave, consulta las [Definiciones del laboratorio](./DEFINICIONES.md).
+---
 
-## Endpoints esperados (ajústalos si tu backend quedo diferente)
-
-- `GET /api/blueprints` → lista general o catálogo para derivar autores.
-- `GET /api/blueprints/{author}`
-- `GET /api/blueprints/{author}/{name}`
-- `POST /api/blueprints` (requiere JWT)
-- `POST /api/auth/login` → `{ token }`
-
-Configura la URL base en `.env`.
-
-## Cómo arrancar
+## Instalacion y ejecucion
 
 ```bash
+git clone https://github.com/AnaFiquitiva/Lab_P3_BluePrints_React_UI.git
+cd Lab_P3_BluePrints_React_UI
 npm install
 cp .env.example .env
-# edita .env con la URL del backend
 npm run dev
 ```
 
-Abre `http://localhost:5173`
+Abrir `http://localhost:5173` en el navegador.
+
+Por defecto, la aplicacion arranca en **modo mock** (`VITE_USE_MOCK=true`), lo que permite usarla sin necesidad de tener el backend corriendo.
+
+---
 
 ## Variables de entorno
 
-Crea un archivo `.env` en la raíz:
+El archivo `.env` en la raiz del proyecto contiene las siguientes variables:
 
-```variable
-VITE_API_BASE_URL=http://localhost:8080/api
-```
+| Variable | Descripcion | Valor por defecto |
+|---|---|---|
+| `VITE_API_BASE_URL` | URL base de la API REST del backend | `http://localhost:8080/api` |
+| `VITE_USE_MOCK` | Activa (`true`) o desactiva (`false`) el servicio mock | `true` |
 
-> **Tip:** en producción usa variables seguras o un _reverse proxy_.
-
-## Estructura
-
-```carpetas
-blueprints-react-lab/
-├─ src/
-│  ├─ components/
-│  ├─ features/blueprints/blueprintsSlice.js
-│  ├─ pages/
-│  ├─ services/apiClient.js   # axios + interceptores JWT
-│  ├─ store/index.js          # Redux Toolkit
-│  ├─ App.jsx, main.jsx, styles.css
-├─ tests/
-├─ .github/workflows/ci.yml
-├─ index.html, package.json, vite.config.js, README.md
-```
-
-## 📌 Requerimientos del laboratorio
-
-## 1. Canvas (lienzo)
-
-- Agregar un lienzo (Canvas) a la página.
-- Incluir un componente `BlueprintCanvas` con un identificador propio.
-- Definir dimensiones adecuadas (ej. `520×360`) para que no ocupe toda la pantalla pero permita dibujar los planos.
-
-## 2. Listar los planos de un autor
-
-- Permitir ingresar el nombre de un autor y consultar sus planos desde el backend (o mock).
-- Mostrar los resultados en una tabla con las siguientes columnas:
-  - Nombre del plano
-  - Número de puntos
-  - Botón `Open` para abrirlo
-
-## 3. Seleccionar un plano y graficarlo
-
-Al hacer clic en el botón `Open`, debe:
-
-- Actualizar un campo de texto con el nombre del plano actual.
-- Obtener los puntos del plano correspondiente.
-- Dibujar consecutivamente los segmentos de recta en el canvas y marcar cada punto.
-
-## 4. Servicios: `apimock` y `apiclient`
-
-- Implementar dos servicios con la misma interfaz:
-  - `apimock`: retorna datos de prueba desde memoria.
-  - `apiclient`: consume el API REST real con Axios.
-- La interfaz de ambos debe incluir los métodos:
-  - `getAll`
-  - `getByAuthor`
-  - `getByAuthorAndName`
-  - `create`
-- Habilitar el cambio entre `apimock` y `apiclient` con una sola línea de código:
-  - Definir un módulo `blueprintsService.js` que importe uno u otro según una variable en `.env`.
-  - Ejemplo en `.env` (Vite):
+Para conectar con el backend real, editar `.env`:
 
 ```env
-VITE_USE_MOCK=true
+VITE_API_BASE_URL=http://localhost:8080/api
+VITE_USE_MOCK=false
 ```
 
-- `VITE_USE_MOCK=true` usa el mock.
-- `VITE_USE_MOCK=false` usa el API real.
+---
 
-## 5. Interfaz con React
+## Estructura del proyecto
 
-- El nombre del plano actual debe mostrarse en el DOM como parte del estado global (Redux).
-- Evitar manipular directamente el DOM; usar componentes y props/estado.
-
-## 6. Estilos
-
-- Agregar estilos para mejorar la presentación.
-- Se puede usar Bootstrap u otro framework CSS.
-- Ajustar la tabla, botones y tarjetas para acercarse al mock de referencia.
-
-## 7. Pruebas unitarias
-
-- Agregar pruebas con Vitest + Testing Library para validar:
-  - Render del canvas.
-  - Envío de formularios.
-  - Interacciones básicas con Redux (por ejemplo: dispatch de `fetchByAuthor`).
+```
+blueprints-react-lab/
+├── src/
+│   ├── components/
+│   │   ├── BlueprintCanvas.jsx      # Lienzo canvas 520x360
+│   │   ├── BlueprintForm.jsx        # Formulario de creacion (JSON)
+│   │   ├── BlueprintList.jsx        # Lista de blueprints en tarjetas
+│   │   └── PrivateRoute.jsx         # Ruta protegida por JWT
+│   ├── features/
+│   │   ├── auth/
+│   │   │   └── authSlice.js         # Slice de autenticacion (login/logout)
+│   │   └── blueprints/
+│   │       └── blueprintsSlice.js   # Slice principal (thunks + selectors)
+│   ├── pages/
+│   │   ├── BlueprintsPage.jsx       # Pagina principal (buscar, tabla, canvas)
+│   │   ├── BlueprintDetailPage.jsx  # Detalle de un blueprint por ruta
+│   │   ├── CreateBlueprintPage.jsx  # Creacion interactiva (clic en canvas)
+│   │   ├── LoginPage.jsx            # Inicio de sesion
+│   │   └── NotFound.jsx             # Pagina 404
+│   ├── services/
+│   │   ├── apiClient.js             # Instancia Axios + interceptores JWT
+│   │   ├── apimock.js               # Servicio mock (datos en memoria)
+│   │   ├── apireal.js               # Servicio API real (wrapper Axios)
+│   │   └── blueprintsService.js     # Conmutador mock/real via VITE_USE_MOCK
+│   ├── store/
+│   │   └── index.js                 # Configuracion del store Redux
+│   ├── App.jsx                      # Rutas y navegacion
+│   ├── main.jsx                     # Punto de entrada
+│   └── styles.css                   # Estilos globales (dark theme)
+├── tests/
+│   ├── setup.js                     # Mock de canvas + jest-dom
+│   ├── BlueprintCanvas.test.jsx     # Test de renderizado del canvas
+│   ├── BlueprintForm.test.jsx       # Test de envio de formulario
+│   ├── BlueprintsPage.test.jsx      # Test de interacciones Redux
+│   └── blueprintsSlice.test.jsx     # Test de reducers puros
+├── .github/workflows/ci.yml         # Pipeline CI (lint + test + build)
+├── .env.example                     # Variables de entorno de referencia
+├── Dockerfile                       # Build multi-stage para produccion
+├── docker-compose.yml               # Compose front + backend
+├── eslint.config.js                 # ESLint 9 (Flat Config)
+├── vitest.config.js                 # Configuracion de Vitest
+├── vite.config.js                   # Configuracion de Vite
+└── package.json
+```
 
 ---
 
-### Notas rápidas y recomendaciones
+## Arquitectura y diseno
 
-- Para el canvas en tests con jsdom: agregar un mock de `HTMLCanvasElement.prototype.getContext` en `tests/setup.js`.
-- Para usar `@testing-library/jest-dom` con Vitest: en `tests/setup.js` importar `import '@testing-library/jest-dom'` y asegurarse de que Vitest provea el global `expect` (configurar `vitest.config.js` con la opción `test: { globals: true, setupFiles: './tests/setup.js' }`).
-- Para la conmutación de servicios en Vite, usar `import.meta.env.VITE_USE_MOCK` para leer la variable en tiempo de ejecución.
+La aplicacion sigue una arquitectura basada en capas:
 
-## 📌 Recomendaciones y actividades sugeridas para el exito del laboratorio
+```
+Componentes (UI)
+      |
+   Paginas (composicion de componentes)
+      |
+   Redux Store (estado global: slices + thunks)
+      |
+   Capa de Servicios (blueprintsService.js)
+      |
+   apimock.js  <-->  apireal.js (apiClient.js + Axios)
+```
 
-1. **Redux avanzado**
-   - [ ] Agrega estados `loading/error` por _thunk_ y muéstralos en la UI.
-   - [ ] Implementa _memo selectors_ para derivar el top-5 de blueprints por cantidad de puntos.
-2. **Rutas protegidas**
-   - [ ] Crea un componente `<PrivateRoute>` y protege la creación/edición.
-3. **CRUD completo**
-   - [ ] Implementa `PUT /api/blueprints/{author}/{name}` y `DELETE ...` en el slice y en la UI.
-   - [ ] Optimistic updates (revertir si falla).
-4. **Dibujo interactivo**
-   - [ ] Reemplaza el `svg` por un lienzo donde el usuario haga _click_ para agregar puntos.
-   - [ ] Botón “Guardar” que envíe el blueprint.
-5. **Errores y _Retry_**
-   - [ ] Si `GET` falla, muestra un banner y un botón **Reintentar** que dispare el thunk.
-6. **Testing**
-   - [ ] Pruebas de `blueprintsSlice` (reducers puros).
-   - [ ] Pruebas de componentes con Testing Library (render, interacción).
-7. **CI/Lint/Format**
-   - [ ] Activa **GitHub Actions** (workflow incluido) → lint + test + build.
-8. **Docker (opcional)**
-   - [ ] Crea `Dockerfile` (+ `compose`) para front + backend.
+**Principios aplicados:**
 
-## Criterios de evaluación
-
-- Funcionalidad y cobertura de casos (30%)
-- Calidad de código y arquitectura (Redux, componentes, servicios) (25%)
-- Manejo de estado, errores, UX (15%)
-- Pruebas automatizadas (15%)
-- Seguridad (JWT/Interceptores/Rutas protegidas) (10%)
-- CI/Lint/Format (5%)
-
-## Scripts
-
-- `npm run dev` – servidor de desarrollo Vite
-- `npm run build` – build de producción
-- `npm run preview` – previsualizar build
-- `npm run lint` – ESLint
-- `npm run format` – Prettier
-- `npm test` – Vitest
+- Componentizacion: cada pieza de la UI es un componente reutilizable
+- Separacion de responsabilidades: servicios, estado y UI en capas independientes
+- Estado global gestionado exclusivamente via Redux (sin manipulacion directa del DOM)
+- Conmutacion de servicios mediante una unica variable de entorno
 
 ---
 
-### Extensiones propuestas del reto
+## Funcionalidades implementadas
 
-- **Redux Toolkit Query** para _caching_ de requests.
-- **MSW** para _mocks_ sin backend.
-- **Dark mode** y diseño responsive.
+### 1. Canvas (lienzo)
 
-> Este proyecto es un punto de partida para que tus estudiantes evolucionen el cliente clásico de Blueprints a una SPA moderna con prácticas de la industria.
+- Componente `BlueprintCanvas` que renderiza un elemento `<canvas>` HTML5 de 520x360 pixeles
+- Dibuja una grilla de fondo como referencia visual
+- Representa los puntos de un blueprint como circulos amarillos
+- Conecta los puntos con segmentos de recta consecutivos en color azul claro
+- Se reutiliza en la pagina principal, detalle y creacion
+
+### 2. Listar planos de un autor
+
+- Campo de entrada para ingresar el nombre de un autor
+- Boton "Get blueprints" que despacha un thunk para consultar los planos
+- Soporte para busqueda con tecla Enter
+- Tabla de resultados con tres columnas:
+  - Nombre del plano
+  - Numero de puntos
+  - Boton "Open"
+- Total de puntos del autor calculado con `useMemo`
+
+### 3. Seleccionar un plano y graficarlo
+
+- Al hacer clic en "Open", se despacha `fetchBlueprint` que obtiene el blueprint completo
+- El estado global `current` se actualiza con el blueprint seleccionado
+- El nombre del plano actual se muestra en la seccion del canvas ("Current blueprint: ...")
+- El canvas se redibuja automaticamente con los puntos y segmentos del plano
+
+### 4. Capa de servicios con conmutacion
+
+- `apimock.js`: retorna datos de prueba desde un arreglo en memoria con delay simulado (300ms). Contiene 4 blueprints de 2 autores (JohnConnor, SarahConnor)
+- `apireal.js`: consume la API REST real mediante Axios
+- Ambos servicios comparten la misma interfaz con cuatro metodos:
+  - `getAll()` -- obtiene todos los blueprints
+  - `getByAuthor(author)` -- filtra por autor
+  - `getByAuthorAndName(author, name)` -- obtiene un blueprint especifico
+  - `create(blueprint)` -- crea un nuevo blueprint
+- `blueprintsService.js` importa uno u otro segun `import.meta.env.VITE_USE_MOCK`
+
+### 5. Interfaz React con estado global
+
+- El nombre del plano actual se almacena en `state.blueprints.current` (Redux)
+- Todos los datos se muestran mediante componentes React con `useSelector` y `useDispatch`
+- No se manipula el DOM directamente en ningun punto del codigo
+
+### 6. Estilos
+
+- Tema oscuro (dark mode) con paleta de colores coherente via CSS custom properties
+- Tipografia profesional con Google Fonts (Inter)
+- Animaciones de hover en botones, tarjetas y filas de tabla
+- Spinner animado para estados de carga
+- Efectos de foco en campos de entrada con sombra azul
+- Diseno responsive con media query para pantallas menores a 768px
+- Gradiente en el titulo del header
+
+### 7. Pruebas unitarias
+
+Se implementaron 12 pruebas distribuidas en 4 archivos:
+
+| Archivo | Pruebas | Que valida |
+|---|---|---|
+| `BlueprintCanvas.test.jsx` | 1 | Renderizado del canvas y llamada a `getContext` |
+| `BlueprintForm.test.jsx` | 2 | Envio de formulario con puntos parseados; alerta con JSON invalido |
+| `BlueprintsPage.test.jsx` | 3 | Dispatch de `fetchByAuthor`; renderizado con datos; error banner |
+| `blueprintsSlice.test.jsx` | 6 | Estado inicial; `clearError`; `pending`/`fulfilled` de 3 thunks |
+
+Configuracion de tests:
+- `vitest.config.js` con `globals: true`, entorno `jsdom`
+- `tests/setup.js` con mock completo de `HTMLCanvasElement.prototype.getContext` e importacion de `@testing-library/jest-dom`
+
+---
+
+## Capa de servicios
+
+### Conmutacion mock / API real
+
+```
+.env                          blueprintsService.js
+─────────────────             ─────────────────────
+VITE_USE_MOCK=true   ──────>  import apimock
+VITE_USE_MOCK=false  ──────>  import apiclient (apireal.js)
+```
+
+El modulo `blueprintsService.js` actua como punto unico de acceso. El `blueprintsSlice.js` importa unicamente este modulo, por lo que cambiar de mock a real requiere editar una sola linea en `.env`.
+
+### Interceptores Axios (apiClient.js)
+
+- **Request interceptor**: agrega automaticamente el header `Authorization: Bearer <token>` si existe un token en `localStorage`
+- **Response interceptor**: si el servidor responde con `401 Unauthorized`, elimina el token almacenado
+
+---
+
+## Gestion de estado con Redux
+
+### Store
+
+```javascript
+{
+  blueprints: {
+    authors: [],        // Lista de autores unicos
+    byAuthor: {},       // Blueprints indexados por autor
+    current: null,      // Blueprint seleccionado actualmente
+    status: 'idle',     // 'idle' | 'loading' | 'succeeded' | 'failed'
+    error: null         // Mensaje de error
+  },
+  auth: {
+    token: null,        // JWT almacenado
+    username: null,     // Usuario autenticado
+    status: 'idle',
+    error: null
+  }
+}
+```
+
+### Thunks (acciones asincronas)
+
+| Thunk | Endpoint | Descripcion |
+|---|---|---|
+| `fetchAuthors` | `getAll()` | Obtiene todos los blueprints y deriva autores unicos |
+| `fetchByAuthor` | `getByAuthor(author)` | Obtiene blueprints de un autor |
+| `fetchBlueprint` | `getByAuthorAndName(author, name)` | Obtiene un blueprint especifico |
+| `createBlueprint` | `create(payload)` | Crea un nuevo blueprint |
+| `login` | `POST /auth/login` | Autentica y almacena el token JWT |
+
+Todos los thunks gestionan tres estados: `pending`, `fulfilled` y `rejected`.
+
+### Selectors memoizados
+
+- `selectAllByAuthor(author)`: selector factory que retorna blueprints de un autor
+- `selectTop5ByPoints`: retorna los 5 blueprints con mas puntos, ordenados descendientemente
+
+---
+
+## Autenticacion JWT
+
+### Flujo de autenticacion
+
+1. El usuario navega a `/login` e ingresa credenciales
+2. Se despacha el thunk `login` que hace `POST /auth/login`
+3. El servidor responde con un token (campo `access_token` o `token`)
+4. El token se almacena en `localStorage` y en el estado Redux
+5. El interceptor de Axios agrega el token en cada peticion subsiguiente
+6. Al cerrar sesion, se ejecuta `logout` que limpia tanto Redux como `localStorage`
+
+### Rutas protegidas
+
+El componente `PrivateRoute` verifica la existencia del token en el estado Redux:
+- Si hay token, renderiza el componente hijo
+- Si no hay token, redirige automaticamente a `/login`
+
+La ruta `/create` esta protegida de esta manera. La navegacion muestra "Crear" solo si el usuario esta autenticado.
+
+---
+
+## Pruebas automatizadas
+
+Ejecutar las pruebas:
+
+```bash
+npm test
+```
+
+Resultado esperado:
+
+```
+Test Files  4 passed (4)
+     Tests  12 passed (12)
+```
+
+---
+
+## Integracion continua
+
+El archivo `.github/workflows/ci.yml` define un pipeline que se ejecuta en cada push y pull request:
+
+```
+Checkout --> Setup Node 20 --> npm install --> npm run lint --> npm test --> npm run build
+```
+
+---
+
+## Scripts disponibles
+
+| Comando | Descripcion |
+|---|---|
+| `npm run dev` | Inicia el servidor de desarrollo Vite en `http://localhost:5173` |
+| `npm run build` | Genera el bundle de produccion en `dist/` |
+| `npm run preview` | Sirve el build de produccion localmente |
+| `npm run lint` | Ejecuta ESLint sobre todo el proyecto |
+| `npm run format` | Formatea el codigo con Prettier |
+| `npm test` | Ejecuta todas las pruebas con Vitest |
+
+---
+
+## Endpoints consumidos
+
+Los siguientes endpoints son consumidos por el servicio `apireal.js` cuando `VITE_USE_MOCK=false`:
+
+| Metodo | Ruta | Descripcion | Autenticacion |
+|---|---|---|---|
+| `GET` | `/blueprints` | Lista todos los blueprints | No |
+| `GET` | `/blueprints/{author}` | Blueprints de un autor | No |
+| `GET` | `/blueprints/{author}/{name}` | Blueprint especifico | No |
+| `POST` | `/blueprints` | Crear un blueprint | JWT requerido |
+| `POST` | `/auth/login` | Obtener token JWT | No |
+
+La URL base se configura en `.env` con `VITE_API_BASE_URL`.
+
+---
+
+## Docker
+
+### Build y ejecucion con Docker
+
+```bash
+docker build -t blueprints-react .
+docker run -p 5173:4173 blueprints-react
+```
+
+### Con Docker Compose (front + backend)
+
+```bash
+docker compose up
+```
+
+Esto levanta el frontend en el puerto 5173 y espera el backend en el puerto 8080.
+
+---
+
+## Repositorios relacionados
+
+| Laboratorio | Repositorio |
+|---|---|
+| Lab 3 -- REST API Blueprints | [AnaFiquitiva/LAB04_ARSW](https://github.com/AnaFiquitiva/LAB04_ARSW) |
+| Lab 4 -- API con seguridad JWT | [AnaFiquitiva/Lab_P2_BluePrints_Java21_API_Security_JWT](https://github.com/AnaFiquitiva/Lab_P2_BluePrints_Java21_API_Security_JWT) |
+| Lab 5 -- React Client (este repo) | [AnaFiquitiva/Lab_P3_BluePrints_React_UI](https://github.com/AnaFiquitiva/Lab_P3_BluePrints_React_UI) |
+
+---
+
+## Autor
+
+**Ana Fiquitiva**
+Escuela Colombiana de Ingenieria Julio Garavito
+Arquitectura de Software -- ARSW

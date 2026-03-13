@@ -20,4 +20,19 @@ describe('BlueprintForm', () => {
       points: [{ x: 1, y: 2 }],
     })
   })
+
+  it('muestra alerta con JSON inválido', () => {
+    const onSubmit = vi.fn()
+    vi.spyOn(window, 'alert').mockImplementation(() => {})
+    render(<BlueprintForm onSubmit={onSubmit} />)
+
+    fireEvent.change(screen.getByLabelText(/Puntos/i), {
+      target: { value: 'not-json' },
+    })
+    fireEvent.submit(screen.getByText(/Guardar/i))
+
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(window.alert).toHaveBeenCalledWith('JSON de puntos inválido')
+    window.alert.mockRestore()
+  })
 })
